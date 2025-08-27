@@ -4,8 +4,8 @@ import bcryptjs from "bcryptjs";
 
 export const sendEmail = async ({ email, emailType, userId }: any) => {
   try {
-    // create a hased token
-    const hashedToken = await bcryptjs.hash(userId.toString(), 10); // 10 rounds of encryption and also tostring as we can receive both json and bson thats why.
+    // create a hashed token
+    const hashedToken = await bcryptjs.hash(userId.toString(), 10);
 
     if (emailType === "VERIFY") {
       await User.findByIdAndUpdate(userId, {
@@ -19,17 +19,17 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
       });
     }
 
-var transport = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 2525,
-  auth: {
-    user: process.env.MAILTRAP_USER,
-    pass: process.env.MAILTRAP_PASS,
-  },
-});
+    var transport = nodemailer.createTransport({
+      host: process.env.MAILTRAP_HOST || "sandbox.smtp.mailtrap.io",
+      port: parseInt(process.env.MAILTRAP_PORT || "2525"),
+      auth: {
+        user: process.env.MAILTRAP_USER,
+        pass: process.env.MAILTRAP_PASS,
+      },
+    });
 
     const mailOptions = {
-      from: "meet.adlakha@gmail.com",
+      from: process.env.FROM_EMAIL || "meet.adlakha@gmail.com",
       to: email,
       subject:
         emailType === "VERIFY" ? "Verify your email" : "Reset your password",
@@ -44,9 +44,10 @@ var transport = nodemailer.createTransport({
             </p>`,
     };
 
-    const mailresponse = await transport.sendMail(mailOptions);
-    return mailresponse;
+    const mailResponse = await transport.sendMail(mailOptions);
+    return mailResponse;
   } catch (error: any) {
+    console.error("Email sending error:", error);
     throw new Error(error.message);
   }
 };

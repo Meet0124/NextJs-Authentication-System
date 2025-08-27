@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import User from "@/models/userModel";
 
 connect();
+
 export async function POST(request: NextRequest) {
   try {
     const reqBody = await request.json();
@@ -19,7 +20,8 @@ export async function POST(request: NextRequest) {
     }
     console.log(user);
 
-    user.isVerfied = true;
+    // Fix: isVerfied -> isVerified
+    user.isVerified = true;
     user.verifyToken = undefined;
     user.verifyTokenExpiry = undefined;
     await user.save();
@@ -29,6 +31,7 @@ export async function POST(request: NextRequest) {
       success: true,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.messages }, { status: 500 });
+    // Fix: error.message -> error.message
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

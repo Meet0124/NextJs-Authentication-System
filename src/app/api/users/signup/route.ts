@@ -2,6 +2,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
+import { sendEmail } from "@/helpers/mailer";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
     const reqBody = await request.json();
     const { username, email, password } = reqBody;
 
-    console.log("Request body:", reqBody);
+    console.log(reqBody);
 
     // Validate required fields
     if (!username || !email || !password) {
@@ -45,7 +46,6 @@ export async function POST(request: NextRequest) {
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
-    // Create new user
     const newUser = new User({
       username,
       email,
@@ -53,27 +53,23 @@ export async function POST(request: NextRequest) {
     });
 
     const savedUser = await newUser.save();
-    console.log("User created successfully:", savedUser._id);
+    console.log(savedUser);
 
-    // Remove password from response
-    const userResponse = {
-      _id: savedUser._id,
-      username: savedUser.username,
-      email: savedUser.email,
-      isVerified: savedUser.isVerified,
-      createdAt: savedUser.createdAt,
-    };
+    // Send verification email
+    await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
 
     return NextResponse.json({
       message: "User created successfully",
       success: true,
-      user: userResponse,
+      savedUser: {
+        _id: savedUser._id,
+        username: savedUser.username,
+        email: savedUser.email,
+        isVerified: savedUser.isVerified,
+      },
     });
   } catch (error: any) {
     console.error("Signup error:", error);
-    return NextResponse.json(
-      { error: error.message || "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

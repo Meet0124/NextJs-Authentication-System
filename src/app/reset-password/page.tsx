@@ -49,15 +49,11 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-    } catch (error: any) {
-      console.log(
-        "Password reset failed",
-        error.response?.data?.error || error.message
-      );
-      toast.error(error.response?.data?.error || "Password reset failed");
-      if (error.response?.data?.error === "Invalid or expired token") {
-        setTokenError(true);
-      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Password reset failed";
+      console.log("Password reset failed", errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

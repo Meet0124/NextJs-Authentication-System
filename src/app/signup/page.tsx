@@ -26,12 +26,11 @@ export default function SignupPage() {
         "Account created successfully! Please check your email to verify your account."
       );
       router.push("/login");
-    } catch (error: any) {
-      console.log(
-        "Signup failed",
-        error.response?.data?.error || error.message
-      );
-      toast.error(error.response?.data?.error || "Signup failed");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Signup failed";
+      console.log("Signup failed", errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

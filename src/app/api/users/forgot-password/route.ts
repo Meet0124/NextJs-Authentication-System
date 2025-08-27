@@ -36,8 +36,10 @@ export async function POST(request: NextRequest) {
       message: "Password reset link sent successfully",
       success: true,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "An error occurred";
     console.error("Forgot password error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

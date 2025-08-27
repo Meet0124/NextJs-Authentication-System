@@ -22,12 +22,11 @@ export default function ForgotPasswordPage() {
       console.log("Forgot password success", response.data);
       toast.success("Password reset link sent to your email!");
       setEmailSent(true);
-    } catch (error: any) {
-      console.log(
-        "Forgot password failed",
-        error.response?.data?.error || error.message
-      );
-      toast.error(error.response?.data?.error || "Failed to send reset email");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to send reset email";
+      console.log("Forgot password failed", errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

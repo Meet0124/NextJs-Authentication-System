@@ -88,8 +88,10 @@ export async function POST(request: NextRequest) {
         isVerified: savedUser.isVerified,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Signup failed";
     console.error("Signup error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

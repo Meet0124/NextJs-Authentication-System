@@ -22,9 +22,11 @@ export default function VerifyEmailPage() {
       const response = await axios.post("/api/users/verifyemail", { token });
       setVerified(true);
       setError(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to verify email";
       setError(true);
-      setErrorMessage(error.response?.data?.error || "Failed to verify email");
+      setErrorMessage(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -42,11 +44,11 @@ export default function VerifyEmailPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (token.length > 0) {
-      verifyUserEmail();
-    }
-  }, [token]);
+useEffect(() => {
+  if (token.length > 0) {
+    verifyUserEmail();
+  }
+}, [token]);
 
   // Loading state
   if (loading) {

@@ -14,7 +14,13 @@ export default function ProfilePage() {
   const router = useRouter();
   const [data, setData] = useState("nothing");
   const [loading, setLoading] = useState(false);
-  const [userDetails, setUserDetails] = useState<any>(null);
+ const [userDetails, setUserDetails] = useState<{
+   _id: string;
+   username: string;
+   email: string;
+   isVerified: boolean;
+   isAdmin: boolean;
+ } | null>(null);
 
   const logout = async () => {
     try {
@@ -22,9 +28,11 @@ export default function ProfilePage() {
       await axios.get("api/users/logout");
       toast.success("Logout successful");
       router.push("/login");
-    } catch (error: any) {
-      console.log(error.message);
-      toast.error(error.message);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Logout failed";
+      console.log(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -38,7 +46,7 @@ export default function ProfilePage() {
       setData(res.data.data._id);
       setUserDetails(res.data.data);
       toast.success("User details loaded");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Failed to load user details");
       console.error(error);
     } finally {

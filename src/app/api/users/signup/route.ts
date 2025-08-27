@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const reqBody = await request.json();
     const { username, email, password } = reqBody;
 
-    console.log(reqBody);
+    console.log("Signup request:", { username, email, password: "***" });
 
     // Validate required fields
     if (!username || !email || !password) {
@@ -53,10 +53,30 @@ export async function POST(request: NextRequest) {
     });
 
     const savedUser = await newUser.save();
-    console.log(savedUser);
+    console.log("User saved:", {
+      id: savedUser._id,
+      username: savedUser.username,
+      email: savedUser.email,
+      isVerified: savedUser.isVerified,
+    });
 
     // Send verification email
-    await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
+    console.log("Attempting to send verification email...");
+    try {
+      await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
+      console.log("Verification email sent successfully");
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      // Don't fail the signup if email fails, but log it
+    }
+
+    // Check if verification token was saved
+    const userWithToken = await User.findById(savedUser._id);
+    console.log("User verification token status:", {
+      hasVerifyToken: !!userWithToken?.verifyToken,
+      tokenExpiry: userWithToken?.verifyTokenExpiry,
+      isVerified: userWithToken?.isVerified,
+    });
 
     return NextResponse.json({
       message: "User created successfully",
